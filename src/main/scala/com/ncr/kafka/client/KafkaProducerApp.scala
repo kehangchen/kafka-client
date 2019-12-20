@@ -33,7 +33,7 @@ object KafkaProducerApp extends App {
       logger.info(message)
     }
   }catch{
-    case e:Exception => e.printStackTrace()
+    case e:Exception => logger.error(e.getLocalizedMessage)
   }finally {
     producer.close()
   }

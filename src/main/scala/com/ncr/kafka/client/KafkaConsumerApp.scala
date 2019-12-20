@@ -2,6 +2,7 @@ package com.ncr.kafka.client
 
 import java.io.{FileInputStream, FileNotFoundException}
 import java.nio.file.Files
+import java.time.Duration
 import java.util.{Collections, Properties}
 import java.util.regex.Pattern
 
@@ -29,23 +30,15 @@ object KafkaConsumerApp extends App {
     throw new FileNotFoundException("Properties file cannot be loaded")
   }
 
-  val props:Properties = new Properties()
-  props.put("group.id", "test")
-  props.put("bootstrap.servers","localhost:9092")
-  props.put("key.deserializer",
-    "org.apache.kafka.common.serialization.StringDeserializer")
-  props.put("value.deserializer",
-    "org.apache.kafka.common.serialization.StringDeserializer")
-  props.put("enable.auto.commit", "true")
-  props.put("auto.commit.interval.ms", "1000")
-  val consumer = new KafkaConsumer(props)
-  val topics = List("text_topic")
+  val consumer = new KafkaConsumer(kafka_props)
+  val topic_string = kafka_props.getProperty("topic_name")
+  val topics =  topic_string.split(',').toList
   try {
     consumer.subscribe(topics.asJava)
     while (true) {
-      val records = consumer.poll(10)
+      val records = consumer.poll(Duration.ofSeconds(10))
       for (record <- records.asScala) {
-        println("Topic: " + record.topic() +
+        logger.info("Topic: " + record.topic() +
           ",Key: " + record.key() +
           ",Value: " + record.value() +
           ", Offset: " + record.offset() +
@@ -53,7 +46,7 @@ object KafkaConsumerApp extends App {
       }
     }
   }catch{
-    case e:Exception => e.printStackTrace()
+    case e:Exception => logger.error(e.getLocalizedMessage)
   }finally {
     consumer.close()
   }
