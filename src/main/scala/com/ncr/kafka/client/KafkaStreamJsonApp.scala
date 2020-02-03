@@ -33,9 +33,10 @@ object KafkaStreamJsonApp extends App {
         Some(M(map)) <- List(JSON.parseFull(textLine))
         //L(metadata) = map("header")
         L(body) = map("Body")
-        I(bodyStr) = body.flatMap(a => a.toString())
+
       } yield {
-        bodyStr
+        body.foreach(println)
+        body
       }
     })
 
