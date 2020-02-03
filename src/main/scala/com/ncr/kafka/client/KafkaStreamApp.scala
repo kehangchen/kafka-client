@@ -103,7 +103,7 @@ object KafkaStreamApp extends App {
   }
 
   val builder = new StreamsBuilder()
-  val textLines: KStream[String, String] = builder.stream[String, String]("streams-plaintext-input")
+  val textLines: KStream[String, String] = builder.stream[String, String]("streams-metadata-input")
   val wordCounts: KTable[String, Long] = textLines
     .flatMapValues(textLine => textLine.toLowerCase.split("\\W+"))
     .groupBy((_, word) => word)
