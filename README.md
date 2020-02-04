@@ -16,8 +16,5 @@ To run metadata class:
 * Create output topic: ``kafka-topics --create --topic streams-metadata-output --zookeeper localhost:2181 --partitions 1 --replication-factor 1``
 * Use Kafka producer: ``kafka-console-producer --broker-list localhost:9092 --topic streams-metadata-input``
 * Use Kafka producer with key: ``kafka-console-producer --broker-list localhost:9092 --topic streams-metadata-input --property "parse.key=true" --property "key.separator=:"``
-* Use Kafka producer with file: ``echo "key1:" | cat data_payload_one_record.json | kafka-console-producer --broker-list localhost:9092 --topic streams-metadata-input -property "parse.key=true" --property "key.separator=:"``
+* Use Kafka producer with file: ``cat data_payload_one_record.json | kafka-console-producer --broker-list localhost:9092 --topic streams-metadata-input``
 * Use Kafka consumer: ``kafka-console-consumer --topic streams-metadata-output --from-beginning --bootstrap-server localhost:9092 --property print.key=true  --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer``
-
-
-Send and receive JSON objects with Kafka java client: https://medium.com/@asce4s/send-and-receive-json-objects-with-kafka-java-client-41bfbb4de108

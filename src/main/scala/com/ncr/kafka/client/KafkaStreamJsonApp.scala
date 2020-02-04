@@ -15,7 +15,6 @@ object KafkaStreamJsonApp extends App {
   lazy val logger = LoggerFactory.getLogger(getClass)
   import org.apache.kafka.streams.scala.Serdes._
   import org.apache.kafka.streams.scala.ImplicitConversions._
-  import scala.collection.mutable.ListBuffer
 
   val config: Properties = {
     val p = new Properties()
@@ -27,19 +26,18 @@ object KafkaStreamJsonApp extends App {
 
   val builder = new StreamsBuilder()
   val payload: KStream[String, String] = builder.stream[String, String]("streams-metadata-input")
-  val jsonArray: KStream[String, List[Any]] = payload
+  val jsonArray: KStream[String, String] = payload
     .flatMapValues(textLine => {
       for {
         Some(M(map)) <- List(JSON.parseFull(textLine))
         M(metadata) = map("header")
-        L(body) = map("Body")
+        S(body) = (map("Body").asInstanceOf[List[Any]] map (_.toString)).toArray.mkString("\n")
       } yield {
-        body.foreach(m => println(JSONObject(m.asInstanceOf[Map[String, Any]]).toString()))
         body
       }
     })
 
-  //jsonArray.to("streams-metadata-output")
+  jsonArray.to("streams-metadata-output")
   val streams: KafkaStreams = new KafkaStreams(builder.build(), config)
   streams.cleanUp()
   streams.start()
@@ -52,7 +50,7 @@ object KafkaStreamJsonApp extends App {
   class CC[T] { def unapply(a:Any):Option[T] = Some(a.asInstanceOf[T]) }
 
   object M extends CC[Map[String, Any]]
-  object L extends CC[List[Any]]
+  object L extends CC[Array[String]]
   object I extends CC[List[String]]
   object S extends CC[String]
   object D extends CC[Double]
