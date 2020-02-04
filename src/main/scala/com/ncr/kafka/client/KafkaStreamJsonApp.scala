@@ -25,17 +25,6 @@ object KafkaStreamJsonApp extends App {
     p
   }
 
-  val outConfig: Properties = {
-    val p = new Properties()
-    p.put(StreamsConfig.APPLICATION_ID_CONFIG, "out-metadata-application")
-    val bootstrapServers = if (args.length > 0) args(0) else "localhost:9092"
-    p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
-    p
-  }
-
-  val outBuilder = new StreamsBuilder()
-  val outRecord: KStream[String, String] = outBuilder.stream[String, String]("streams-metadata-output")
-
   val builder = new StreamsBuilder()
   val payload: KStream[String, String] = builder.stream[String, String]("streams-metadata-input")
   val jsonArray: KStream[String, List[Any]] = payload
@@ -45,14 +34,11 @@ object KafkaStreamJsonApp extends App {
         M(metadata) = map("header")
         L(body) = map("Body")
       } yield {
-        body.foreach(m => outRecord.mapValues(m => JSONObject(m.asInstanceOf[Map[String, Any]]).toString()).to("streams-metadata-output"))
+        body.foreach(m => println(JSONObject(m.asInstanceOf[Map[String, Any]]).toString()))
         body
       }
     })
 
-  val outStreams: KafkaStreams = new KafkaStreams(outBuilder.build(), outConfig)
-  outStreams.cleanUp()
-  outStreams.start()
   //jsonArray.to("streams-metadata-output")
   val streams: KafkaStreams = new KafkaStreams(builder.build(), config)
   streams.cleanUp()
@@ -60,7 +46,6 @@ object KafkaStreamJsonApp extends App {
 
   // Add shutdown hook to respond to SIGTERM and gracefully close Kafka Streams
   sys.ShutdownHookThread {
-    outStreams.close(Duration.ofSeconds(1))
     streams.close(Duration.ofSeconds(1))
   }
 
