@@ -37,10 +37,12 @@ object KafkaStreamJsonApp extends App {
         val stringBodyBuffer : StringBuffer = new StringBuffer()
         for(i <- 0 until stringBody.length){
           stringBodyBuffer.append("{"+stringBody(i).toString.concat(",metadata:").concat(new JSONObject(metadata).toString())+"}")
+          stringBodyBuffer.append("\n")
         }
         stringBodyBuffer.toString
       }
     })
+    .flatMapValues(json => json.split("\\n"))
 
   jsonArray.to("hub_topic")
   val streams: KafkaStreams = new KafkaStreams(builder.build(), config)
