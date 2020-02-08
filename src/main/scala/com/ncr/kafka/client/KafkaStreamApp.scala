@@ -3,6 +3,7 @@ package com.ncr.kafka.client
 import java.time.Duration
 import java.util.Properties
 
+import com.ncr.kafka.client.KafkaStreamJsonApp.{builder, config}
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
@@ -108,9 +109,16 @@ object KafkaStreamApp extends App {
     .flatMapValues(textLine => textLine.toLowerCase.split("\\W+"))
     .groupBy((_, word) => word)
     .count()
-  wordCounts.toStream.to("streams-wordcount-output")
 
-  val streams: KafkaStreams = new KafkaStreams(builder.build(), config)
+//  val wordCounts: KStream[String, String] = textLines
+//    .flatMapValues(textLine => textLine.toLowerCase.split("\\W+"))
+//    .groupBy((_, word) => word)
+//    .count()
+
+  wordCounts.toStream.to("streams-wordcount-output")
+  val topology = builder.build(config)
+  System.out.println(topology.describe())
+  val streams: KafkaStreams = new KafkaStreams(topology, config)
 
   // Always (and unconditionally) clean local state prior to starting the processing topology.
   // We opt for this unconditional call here because this will make it easier for you to play around with the example

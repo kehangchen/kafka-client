@@ -18,6 +18,7 @@ object KafkaStreamJsonApp extends App {
 
   val config: Properties = {
     val p = new Properties()
+    // this parameter must be unique within a Kafka cluster
     p.put(StreamsConfig.APPLICATION_ID_CONFIG, "in-metadata-application")
     val bootstrapServers = if (args.length > 0) args(0) else "localhost:9092"
     p.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
@@ -31,14 +32,18 @@ object KafkaStreamJsonApp extends App {
       for {
         Some(M(map)) <- List(JSON.parseFull(textLine))
         M(metadata) = map("header")
+        //S(body) = (map("Body").asInstanceOf[List[Any]] map (_.toString)).toArray.mkString("\n")
         S(body) = (map("Body").asInstanceOf[List[Any]] map (_.toString)).toArray.mkString("\n")
       } yield {
         body
       }
     })
+    .flatMapValues(json => json.split("\\n"))
 
   jsonArray.to("streams-metadata-output")
-  val streams: KafkaStreams = new KafkaStreams(builder.build(), config)
+  val topology = builder.build(config)
+  System.out.println(topology.describe())
+  val streams: KafkaStreams = new KafkaStreams(topology, config)
   streams.cleanUp()
   streams.start()
 
