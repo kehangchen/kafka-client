@@ -40,6 +40,17 @@
             <version>1.1.2</version>
         </dependency>
         <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/net.liftweb/lift-json -->
+        <dependency>
+            <groupId>net.liftweb</groupId>
+            <artifactId>lift-json_2.11</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.25</version>

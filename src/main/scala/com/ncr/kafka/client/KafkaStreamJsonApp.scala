@@ -9,12 +9,19 @@ import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}
 import org.slf4j.LoggerFactory
 
 import scala.util.parsing.json._
+//import com.ncr.kafka.json.JSON._
+//import net.minidev.json
+
+
 
 object KafkaStreamJsonApp extends App {
 
   lazy val logger = LoggerFactory.getLogger(getClass)
   import org.apache.kafka.streams.scala.Serdes._
   import org.apache.kafka.streams.scala.ImplicitConversions._
+  import net.liftweb.json._
+
+//  JSON.globalNumberParser = {in => try in.toLong catch { case _: NumberFormatException => in.toDouble}}
 
   val config: Properties = {
     val p = new Properties()
@@ -29,16 +36,27 @@ object KafkaStreamJsonApp extends App {
   val payload: KStream[String, String] = builder.stream[String, String]("streams-metadata-input")
   val jsonArray: KStream[String, String] = payload
     .flatMapValues(textLine => {
-      for {
-        Some(M(map)) <- List(JSON.parseFull(textLine))
-        M(metadata) = map("header")
-        //S(body) = (map("Body").asInstanceOf[List[Any]] map (_.toString)).toArray.mkString("\n")
-        S(body) = (map("Body").asInstanceOf[List[Any]] map (_.toString)).toArray.mkString("\n")
-      } yield {
-        body
-      }
+//      for {
+//        Some(M(map)) <- List(JSON.parseFull(textLine))
+//        M(metadata) = map("header")
+//        S(body) = (map("Body").asInstanceOf[List[Map[String, Any]]] map (new JSONObject(_).toString() + (new JSONObject(metadata).toString()))).toArray.mkString("\n")
+//      } yield {
+//        body
+//      }
+
+//      val tree = parseJSON(textLine)
+//      val metadata = tree.header
+//      val body = tree.Body
+//      metadata.toString.split("\\n")
+
+      val raw = JsonParser.parse(textLine)
+      val metadata = raw \\ "header"
+      val JObject(body) = (raw \\ "Body")
+      val JArray(a) = body(0).value
+      val b = ((a map (_ merge metadata)) map (JsonAST.compactRender(_))).toArray.mkString("\n")
+      b.split("\\n")
     })
-    .flatMapValues(json => json.split("\\n"))
+//    .flatMapValues(json => json.split("\\n"))
 
   jsonArray.to("streams-metadata-output")
   val topology = builder.build(config)
