@@ -1,4 +1,4 @@
-package com.ncr.kafka.client
+package com.ncr.stream.kafka
 
 import java.io.{FileInputStream, FileNotFoundException}
 import java.nio.file.Files

@@ -1,4 +1,4 @@
-package com.ncr.kafka.client
+package com.ncr.stream.kafka
 
 import java.time.Duration
 import java.util.Properties

@@ -1,9 +1,9 @@
-package com.ncr.kafka.client
+package com.ncr.stream.kafka
 
 import java.time.Duration
 import java.util.Properties
 
-import com.ncr.kafka.client.KafkaStreamJsonApp.{builder, config}
+import com.ncr.stream.kafka.KafkaStreamJsonApp.{builder, config}
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream._
 import org.apache.kafka.streams.{KafkaStreams, StreamsConfig}

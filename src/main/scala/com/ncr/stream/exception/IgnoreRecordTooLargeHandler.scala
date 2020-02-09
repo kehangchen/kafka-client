@@ -1,4 +1,4 @@
-package com.ncr.kafka.exception
+package com.ncr.stream.exception
 
 import java.util
 import java.util.Properties
