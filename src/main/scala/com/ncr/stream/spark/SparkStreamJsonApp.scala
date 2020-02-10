@@ -3,6 +3,7 @@ package com.ncr.stream.spark
 import org.apache.log4j.Logger
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.streaming.Trigger
 import net.liftweb.json._
 
 object SparkStreamJsonApp extends App {
@@ -43,6 +44,7 @@ object SparkStreamJsonApp extends App {
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("topic", "spark-streams-output")
       .option("checkpointLocation", "/Users/kehangchen/Documents/rcg/ncr/spark-client")
+      .trigger(Trigger.Continuous("1 second"))
       .start()
       .awaitTermination()
 }
