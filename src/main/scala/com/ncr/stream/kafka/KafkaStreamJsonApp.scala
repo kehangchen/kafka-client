@@ -27,7 +27,8 @@ object KafkaStreamJsonApp extends App {
       val JObject(body) = (raw \\ "Body")
       val JArray(a) = body(0).value
       ((a map (_ merge metadata)) map (JsonAST.compactRender(_).replace("header", "metadata"))).toArray.mkString("\n").split("\\n")
-    }).to("kafka-streams-output")
+    })
+    .to("kafka-streams-output")
 
   val topology = builder.build(config)
   System.out.println(topology.describe())

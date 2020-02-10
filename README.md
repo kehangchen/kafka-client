@@ -1,3 +1,5 @@
+# Kafka Streaming API Evaluation
+
 To run the application with default main class from a terminal: ``java -jar kafka-client.jar``
 
 To run the application with specified main class from a terminal: ``java -cp kafka-client.jar com.ncr.kafka.client.KafkaConsumerApp``
