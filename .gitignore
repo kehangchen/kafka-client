@@ -4,4 +4,13 @@ data/
 *.iml
 out/
 .DS_Store
+.classpath
+.project
+.settings/
+commits/
 dependency-reduced-pom.xml
+metadata
+offsets/
+sources/
+spark-warehouse
+state/
