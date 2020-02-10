@@ -20,7 +20,7 @@ object SparkStreamJsonApp extends App {
       .getOrCreate()
 
     import spark.implicits._
-    val payload = spark
+    spark
       .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", "localhost:9092")
@@ -28,22 +28,21 @@ object SparkStreamJsonApp extends App {
       .load()
       .selectExpr("CAST(value AS STRING)")
       .as[String]
-
-    val events = payload.flatMap(textLine => {
-      val raw = JsonParser.parse(textLine)
-      val metadata = raw \\ "header"
-      val JObject(body) = (raw \\ "Body")
-      val JArray(a) = body(0).value
-      ((a map (_ merge metadata)) map (JsonAST.compactRender(_).replace("header", "metadata"))).toArray.mkString("\n").split("\\n")
-    })
-
-    // Start running the query that prints the running counts to the console
-    val query = events.writeStream
+      .flatMap(textLine => {
+        val raw = JsonParser.parse(textLine)
+        val metadata = raw \\ "header"
+        val JObject(body) = (raw \\ "Body")
+        val JArray(a) = body(0).value
+        ((a map (_ merge metadata)) map (JsonAST.compactRender(_).replace("header", "metadata")))
+          .toArray
+          .mkString("\n")
+          .split("\\n")
+      })
+      .writeStream
       .format("kafka")
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("topic", "spark-streams-output")
       .option("checkpointLocation", "/Users/kehangchen/Documents/rcg/ncr/spark-client")
       .start()
-
-    query.awaitTermination()
+      .awaitTermination()
 }
