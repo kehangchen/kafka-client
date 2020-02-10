@@ -20,17 +20,3 @@ To run metadata class:
 * Use Kafka producer with key: ``kafka-console-producer --broker-list localhost:9092 --topic kafka-streams-input --property "parse.key=true" --property "key.separator=:"``
 * Use Kafka producer with file: ``cat data_payload_one_record.json | kafka-console-producer --broker-list localhost:9092 --topic kafka-streams-input``
 * Use Kafka consumer: ``kafka-console-consumer --topic kafka-streams-output --from-beginning --bootstrap-server localhost:9092 --property print.key=true  --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer``
-
-
-* Send and receive JSON objects with Kafka java client: https://medium.com/@asce4s/send-and-receive-json-objects-with-kafka-java-client-41bfbb4de108
-* Error handling: https://www.confluent.io/blog/spring-for-apache-kafka-deep-dive-part-1-error-handling-message-conversion-transaction-support/
-* Common error handling patterns: https://docs.confluent.io/current/streams/faq.html
-& Kafka topology for optimization: https://www.confluent.io/blog/optimizing-kafka-streams-applications/
-* Online tool to display the topology graphically: https://zz85.github.io/kafka-streams-viz/
-* Log Compact setting: https://stackoverflow.com/questions/53216633/kafka-compacted-topic-without-limited-retention
-
-
-* Consumer isolation level for atomic transaction: isolation.level: read_committed
-* To enable optimizations using topology: StreamsConfig.TOPOLOGY_OPTIMIZATION = StreamsConfig.OPTIMIZE
-* Enable log compaction: log.cleanup.policy=compact
-* Records won’t get compacted until after this period: log.cleaner.min.compaction.lag.ms = 1000
