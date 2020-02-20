@@ -14,3 +14,4 @@ offsets/
 sources/
 spark-warehouse
 state/
+batch/

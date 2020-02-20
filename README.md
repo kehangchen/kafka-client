@@ -1,6 +1,6 @@
 To compile: ``mvn package``
 
-To run: ``spark-submit --class com.ncr.stream.spark.SparkStreamSQLServerApp --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0 --master local[2] target/spark-sqlserver-1.0-SNAPSHOT-jar-with-dependencies.jar``
+To run: ``spark-submit --class com.ncr.stream.spark.SparkStreamSQLServerApp --packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0,org.apache.bahir:spark-sql-streaming-jdbc_2.11:2.4.0 --master local[2] target/spark-sqlserver-1.0-SNAPSHOT-jar-with-dependencies.jar``
 
 To run metadata class:
 
