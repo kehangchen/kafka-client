@@ -53,24 +53,24 @@ object SparkStreamSQLServerApp extends App {
 
   dataDf.writeStream.trigger(Trigger.ProcessingTime("60 seconds"))
     .outputMode(OutputMode.Update())
-    .foreachBatch { (batchDf: DataFrame, batchId: Long) =>
-      batchDf
-        .select("entry_id", "entity_id", "entity_key")
-        .write
-        .format("jdbc")
-        .option("url", "jdbc:sqlserver://localhost:1433;databaseName=testdb")
-        .option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
-        .option("dbtable", "event")
-        .option("user", "sa")
-        .option("password", "Password@123")
-        .mode(SaveMode.Append)
-        .save()
-    }
 //    .foreachBatch { (batchDf: DataFrame, batchId: Long) =>
-//      insertToTable(batchDf,
-//        "jdbc:sqlserver://localhost:1433;databaseName=testdb;user=sa;password=Password@123",
-//        "event")
+//      batchDf
+//        .select("entry_id", "entity_id", "entity_key")
+//        .write
+//        .format("jdbc")
+//        .option("url", "jdbc:sqlserver://localhost:1433;databaseName=testdb")
+//        .option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver")
+//        .option("dbtable", "event")
+//        .option("user", "sa")
+//        .option("password", "Password@123")
+//        .mode(SaveMode.Append)
+//        .save()
 //    }
+    .foreachBatch { (batchDf: DataFrame, batchId: Long) =>
+      insertToTable(batchDf,
+        "jdbc:sqlserver://localhost:1433;databaseName=testdb;user=sa;password=Password@123",
+        "event")
+    }
     .start()
     .awaitTermination()
 
@@ -87,36 +87,34 @@ object SparkStreamSQLServerApp extends App {
    * @param sqlDatabaseConnectionString
    * @param sqlTableName
    */
-//  def insertToTable(dataframe: DataFrame, sqlDatabaseConnectionString: String, sqlTableName: String): Unit = {
-//
-//    //numPartitions = number of simultaneous DB connections you can planning to give
-//    dataframe.repartition(20)
-//
-//    val tableHeader: String = dataframe.columns.mkString(",")
-//    dataframe.foreachPartition { partition =>
-//      // Note : Each partition one connection (more better way is to use connection pools)
-//      val sqlExecutorConnection: Connection = DriverManager.getConnection(sqlDatabaseConnectionString)
-//      //Batch size of 1000 is used since some databases cant use batch size more than 1000 for ex : Azure sql
-//      partition.grouped(1000).foreach {
-//        group =>
-//          val insertString: scala.collection.mutable.StringBuilder = new scala.collection.mutable.StringBuilder()
-//          group.foreach {
-//            record =>
-//              insertString.append("('" + record.mkString("','") + "')")
-//
-//              val sql =
-//                s"""
-//                   INSERT INTO $sqlTableName
-//                   ($tableHeader)
-//                   VALUES
-//                   $insertString
-//                   ON DUPLICATE KEY UPDATE
-//                   entry_id=${record.getAs[String]("entry_id")}"""
-//              logger.error(sql)
-//              sqlExecutorConnection.createStatement().executeUpdate(sql)
-//          }
-//      }
-//      sqlExecutorConnection.close() // close the connection
-//    }
-//  }
+  def insertToTable(dataframe: DataFrame, sqlDatabaseConnectionString: String, sqlTableName: String): Unit = {
+
+    //numPartitions = number of simultaneous DB connections you can planning to give
+    dataframe.repartition(20)
+
+    val tableHeader: String = dataframe.columns.mkString(",")
+    dataframe.foreachPartition { partition =>
+      // Note : Each partition one connection (more better way is to use connection pools)
+      val sqlExecutorConnection: Connection = DriverManager.getConnection(sqlDatabaseConnectionString)
+      //Batch size of 1000 is used since some databases cant use batch size more than 1000 for ex : Azure sql
+      partition.grouped(1000).foreach {
+        group =>
+          group.foreach {
+            record =>
+              val insertString: scala.collection.mutable.StringBuilder = new scala.collection.mutable.StringBuilder()
+              insertString.append("('" + record.mkString("','") + "')")
+
+              val sql =
+                s"""
+                   INSERT INTO $sqlTableName
+                   ($tableHeader)
+                   VALUES
+                   $insertString"""
+              logger.error(sql)
+              sqlExecutorConnection.createStatement().executeUpdate(sql)
+          }
+      }
+      sqlExecutorConnection.close() // close the connection
+    }
+  }
 }
