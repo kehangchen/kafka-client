@@ -80,7 +80,7 @@ object SparkStreamSQLServerApp extends App {
     .start()
   query1.awaitTermination()
 
-  /**
+   /**
    * Insert in to database using foreach partition.
    *
    * @param dataframe : DataFrame
@@ -88,11 +88,19 @@ object SparkStreamSQLServerApp extends App {
    * @param sqlTableName
    */
   def insertToTable(dataframe: DataFrame, sqlDatabaseConnectionString: String, sqlTableName: String): Unit = {
-
+    val SQL = """MERGE
+      INTO %s WITH (HOLDLOCK) AS target
+      USING (SELECT %s) AS source
+        (%s)
+      ON (target.entry_id = source.entry_id)
+      WHEN NOT MATCHED
+        THEN INSERT (%s)
+        VALUES %s;"""
     //numPartitions = number of simultaneous DB connections you can planning to give
     dataframe.repartition(20)
 
     val tableHeader: String = dataframe.columns.mkString(",")
+    val headerList: Array[String] = dataframe.columns
     dataframe.foreachPartition { partition =>
       // Note : Each partition one connection (more better way is to use connection pools)
       val sqlExecutorConnection: Connection = DriverManager.getConnection(sqlDatabaseConnectionString)
@@ -103,13 +111,21 @@ object SparkStreamSQLServerApp extends App {
             record =>
               val insertString: scala.collection.mutable.StringBuilder = new scala.collection.mutable.StringBuilder()
               insertString.append("('" + record.mkString("','") + "')")
+              val valuesStringTemplate: scala.collection.mutable.StringBuilder = new scala.collection.mutable.StringBuilder()
+              valuesStringTemplate.append("'" + record.mkString("' AS %s,'") + "' AS %s")
+              logger.error("valuesStringTemplate: " + valuesStringTemplate)
+              logger.error("headerList: " + headerList.mkString(","))
 
-              val sql =
-                s"""
-                   INSERT INTO $sqlTableName
-                   ($tableHeader)
-                   VALUES
-                   $insertString"""
+              val valuesString = valuesStringTemplate.format(headerList: _*)
+              logger.error("valuesString: " + valuesString)
+              logger.error("SQL: " + SQL)
+//              val sql =
+//                s"""
+//                   INSERT INTO $sqlTableName
+//                   ($tableHeader)
+//                   VALUES
+//                   $insertString"""
+              val sql = SQL.format(sqlTableName, valuesString, tableHeader, tableHeader, insertString)
               logger.error(sql)
               sqlExecutorConnection.createStatement().executeUpdate(sql)
           }
