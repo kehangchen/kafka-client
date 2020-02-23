@@ -15,3 +15,5 @@ To run metadata class:
 References:
 * Processing Data in Apache Kafka with Structured Streaming in Apache Spark 2.2 - https://databricks.com/blog/2017/04/26/processing-data-in-apache-kafka-with-structured-streaming-in-apache-spark-2-2.html
 * Interesting way to create Spark Json schema - https://stackoverflow.com/questions/48361177/spark-structured-streaming-kafka-convert-json-without-schema-infer-schema
+* Update on primary key so there is no duplicate record with the same key: https://stackoverflow.com/questions/55954996/spark-structured-streaming-primary-key-in-jdbc-sink
+* MS SQL Server "ON DUPLICATE KEY UPDATE" equivalent: https://stackoverflow.com/questions/1197733/does-sql-server-offer-anything-like-mysqls-on-duplicate-key-update
